@@ -2,8 +2,12 @@ import type { ReactNode } from "react";
 import {
   Box,
   FormControl,
+  FormControlLabel,
+  FormLabel,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select as MuiSelect,
   Stack,
   TextField,
@@ -65,8 +69,13 @@ function Metabolic({ state }: Props) {
     description={<>MASLD screening continues when at least {config.metabolicSyndrome.requiredCriteria} of 5 criteria are met. Medication treatment counts for the associated criterion.</>}
     actions={<Actions back={false} />}
   >
-    <Select id="sex" name="sex" label="Sex used for pathway thresholds" required defaultValue={text(answers.sex)}
-      options={[["male", "Male"], ["female", "Female"]]} />
+    <FormControl required>
+      <FormLabel id="sex-label">Sex used for pathway thresholds</FormLabel>
+      <RadioGroup row aria-labelledby="sex-label" name="sex" defaultValue={text(answers.sex)}>
+        <FormControlLabel value="male" control={<Radio required />} label="Male" />
+        <FormControlLabel value="female" control={<Radio required />} label="Female" />
+      </RadioGroup>
+    </FormControl>
     <UnitInput id="waist" label="Waist circumference" value={answers.waist} unit={answers.waistUnit}
       options={[["cm", "cm"], ["in", "inches"]]} />
     <UnitInput id="triglycerides" label="Triglycerides" value={answers.triglycerides} unit={answers.triglyceridesUnit}
