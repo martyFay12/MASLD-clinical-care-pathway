@@ -1,4 +1,14 @@
 import type { ReactNode } from "react";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select as MuiSelect,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { config } from "../config";
 import type { PathwayState, Step } from "../types";
 import { Actions, Check, Input, Select } from "./Fields";
@@ -17,16 +27,16 @@ function UnitInput({ id, label, value, unit, options }: {
   options: [string, string][];
 }) {
   return (
-    <div className="field">
-      <label htmlFor={id}>{label}</label>
-      <div className="input-row">
-        <input id={id} name={id} type="number" min="0" step="any" required defaultValue={text(value)} />
-        <select id={`${id}Unit`} name={`${id}Unit`} defaultValue={text(unit) || options[0][0]}>
+    <Box sx={{ display: "flex", gap: 1 }}>
+      <TextField id={id} name={id} label={label} type="number" slotProps={{ htmlInput: { min: 0, step: "any" } }} required defaultValue={text(value)} fullWidth />
+      <FormControl sx={{ flex: "0 0 120px" }}>
+        <InputLabel id={`${id}-unit-label`}>Unit</InputLabel>
+        <MuiSelect id={`${id}Unit`} name={`${id}Unit`} labelId={`${id}-unit-label`} label="Unit" defaultValue={text(unit) || options[0][0]}>
           {options.map(([optionValue, optionLabel]) =>
-            <option key={optionValue} value={optionValue}>{optionLabel}</option>)}
-        </select>
-      </div>
-    </div>
+            <MenuItem key={optionValue} value={optionValue}>{optionLabel}</MenuItem>)}
+        </MuiSelect>
+      </FormControl>
+    </Box>
   );
 }
 
@@ -36,10 +46,17 @@ function Layout({ description, children, actions = <Actions /> }: {
   actions?: ReactNode;
 }) {
   return <>
-    <p className="form-description">{description}</p>
-    <div className="question-grid">{children}</div>
+    <Typography color="text.secondary" sx={{ mb: 2.75 }}>{description}</Typography>
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 2.25 }}>{children}</Box>
     {actions}
   </>;
+}
+
+function CheckSection({ title, children }: { title: string; children: ReactNode }) {
+  return <Box sx={{ gridColumn: { sm: "1 / -1" } }}>
+    <Typography variant="subtitle2" sx={{ mb: 0.75 }}>{title}</Typography>
+    <Stack spacing={1}>{children}</Stack>
+  </Box>;
 }
 
 function Metabolic({ state }: Props) {
@@ -60,13 +77,10 @@ function Metabolic({ state }: Props) {
     <Input id="diastolic" name="diastolic" label="Diastolic blood pressure (mmHg)" type="number" min="0" step="any" required defaultValue={text(answers.diastolic)} />
     <UnitInput id="glucose" label="Fasting blood glucose" value={answers.glucose} unit={answers.glucoseUnit}
       options={[["mmol", "mmol/L"], ["mgdl", "mg/dL"]]} />
-    <div className="field field-full">
-      <span className="fieldset-title">Current treatment</span>
-      <div className="check-list">
-        <Check id="bloodPressureTreatment" name="bloodPressureTreatment" label="Treatment for elevated blood pressure" defaultChecked={Boolean(answers.bloodPressureTreatment)} />
-        <Check id="glucoseTreatment" name="glucoseTreatment" label="Treatment for elevated blood glucose" defaultChecked={Boolean(answers.glucoseTreatment)} />
-      </div>
-    </div>
+    <CheckSection title="Current treatment">
+      <Check id="bloodPressureTreatment" name="bloodPressureTreatment" label="Treatment for elevated blood pressure" defaultChecked={Boolean(answers.bloodPressureTreatment)} />
+      <Check id="glucoseTreatment" name="glucoseTreatment" label="Treatment for elevated blood glucose" defaultChecked={Boolean(answers.glucoseTreatment)} />
+    </CheckSection>
   </Layout>;
 }
 
@@ -82,28 +96,20 @@ function Alternate({ state }: Props) {
   const medications = (answers.medications || []) as string[];
   const conditions = (answers.geneticConditions || []) as string[];
   return <Layout description="Select known alternate diagnoses or possible causes. Any positive result exits this MASLD pathway.">
-    <div className="field field-full">
-      <span className="fieldset-title">Potential drug-induced liver injury medications</span>
-      <div className="check-list">{config.alternateDiagnoses.diliMedications.map((medication, index) =>
+    <CheckSection title="Potential drug-induced liver injury medications">
+      {config.alternateDiagnoses.diliMedications.map((medication, index) =>
         <Check key={medication} id={`dili-${index}`} name={`dili-${index}`} label={medication} defaultChecked={medications.includes(medication)} />)}
-      </div>
-    </div>
-    <div className="field field-full">
-      <span className="fieldset-title">Viral hepatitis</span>
-      <div className="check-list">
-        <Check id="hbsagPositive" name="hbsagPositive" label="HBsAg positive" defaultChecked={Boolean(answers.hbsagPositive)} />
-        <Check id="hcvPositive" name="hcvPositive" label="HCV antibody positive and HCV RNA positive" defaultChecked={Boolean(answers.hcvPositive)} />
-      </div>
-    </div>
-    <div className="field field-full">
-      <span className="fieldset-title">Genetic conditions</span>
-      <div className="check-list">
-        {config.alternateDiagnoses.geneticConditions.length
-          ? config.alternateDiagnoses.geneticConditions.map((condition, index) =>
-            <Check key={condition} id={`genetic-${index}`} name={`genetic-${index}`} label={condition} defaultChecked={conditions.includes(condition)} />)
-          : <small className="field-hint">No genetic conditions are configured in this prototype.</small>}
-      </div>
-    </div>
+    </CheckSection>
+    <CheckSection title="Viral hepatitis">
+      <Check id="hbsagPositive" name="hbsagPositive" label="HBsAg positive" defaultChecked={Boolean(answers.hbsagPositive)} />
+      <Check id="hcvPositive" name="hcvPositive" label="HCV antibody positive and HCV RNA positive" defaultChecked={Boolean(answers.hcvPositive)} />
+    </CheckSection>
+    <CheckSection title="Genetic conditions">
+      {config.alternateDiagnoses.geneticConditions.length
+        ? config.alternateDiagnoses.geneticConditions.map((condition, index) =>
+          <Check key={condition} id={`genetic-${index}`} name={`genetic-${index}`} label={condition} defaultChecked={conditions.includes(condition)} />)
+        : <Typography variant="caption" color="text.secondary">No genetic conditions are configured in this prototype.</Typography>}
+    </CheckSection>
   </Layout>;
 }
 
@@ -159,4 +165,3 @@ export const stepForms: Record<Exclude<Step, "result">, (props: Props) => ReactN
   app: AppScore,
   elastography: Elastography,
 };
-

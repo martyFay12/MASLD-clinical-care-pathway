@@ -1,4 +1,18 @@
 import { useState, type FormEvent, type MouseEvent } from "react";
+import {
+  Alert,
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  LinearProgress,
+  Paper,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import { ResultPanel } from "./components/ResultPanel";
 import { stepForms } from "./components/StepForm";
 import { submitStep } from "./pathway";
@@ -32,7 +46,7 @@ export default function App() {
   }
 
   function click(event: MouseEvent<HTMLFormElement>) {
-    const action = (event.target as HTMLElement).dataset.action;
+    const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]")?.dataset.action;
     if (action === "back") {
       const previous = state.history.at(-1);
       if (previous) setState({ ...state, currentStep: previous, history: state.history.slice(0, -1), result: undefined });
@@ -44,35 +58,44 @@ export default function App() {
   }
 
   return <>
-    <header className="site-header">
-      <div className="header-content">
-        <a className="brand" href="./" aria-label="MASLD pathway home">
-          <span className="brand-mark">M</span>
-          <span><strong>MASLD Clinical Care Pathway</strong><small>Development prototype</small></span>
-        </a>
-        <span className="privacy-pill">Anonymous session</span>
-      </div>
-    </header>
-    <main className="app-shell">
-      <section className="intro-panel" aria-labelledby="page-title">
-        <p className="eyebrow">Primary care decision support</p>
-        <h1 id="page-title">MASLD Clinical Care Pathway</h1>
-        <p>Answer one set of questions at a time. This tool follows the pathway from suspected steatosis through screening, elastography, and referral.</p>
-        <div className="notice"><strong>Development use only.</strong> Thresholds are configurable assumptions and require clinical validation before use in patient care. Do not enter identifying information.</div>
-      </section>
-      <section className="pathway-card" aria-live="polite">
-        <div className="progress-row">
-          <div><p className="step-label">{state.currentStep === "result" ? "Complete" : `Step ${index} of ${order.length - 1}`}</p><h2>{titles[state.currentStep]}</h2></div>
-          <button className="button button-quiet" type="button" onClick={() => setState(initialState)}>Start over</button>
-        </div>
-        <div className="progress-track" aria-hidden="true"><span style={{ width: `${(index / order.length) * 100}%` }} /></div>
-        <form id="pathway-form" key={state.currentStep} onSubmit={submit} onClick={click}>
+    <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Toolbar sx={{ width: "100%", maxWidth: 952, mx: "auto", gap: 1.5 }}>
+        <Avatar variant="rounded" sx={{ bgcolor: "primary.main", fontWeight: 800 }}>M</Avatar>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography sx={{ fontWeight: 800 }}>MASLD Clinical Care Pathway</Typography>
+          <Typography variant="caption" color="text.secondary">Development prototype</Typography>
+        </Box>
+        <Chip label="Anonymous session" size="small" sx={{ bgcolor: "primary.light", color: "primary.dark", fontWeight: 700, display: { xs: "none", sm: "flex" } }} />
+      </Toolbar>
+    </AppBar>
+    <Container component="main" maxWidth="md" sx={{ py: { xs: 3.5, sm: 6 } }}>
+      <Box component="section" aria-labelledby="page-title" sx={{ mb: 3.5 }}>
+        <Typography variant="overline" color="primary" sx={{ fontWeight: 800, letterSpacing: "0.09em" }}>Primary care decision support</Typography>
+        <Typography variant="h1" component="h1" id="page-title" sx={{ mb: 1 }}>MASLD Clinical Care Pathway</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 740, mb: 2 }}>
+          Answer one set of questions at a time. This tool follows the pathway from suspected steatosis through screening, elastography, and referral.
+        </Typography>
+        <Alert severity="warning"><strong>Development use only.</strong> Thresholds are configurable assumptions and require clinical validation before use in patient care. Do not enter identifying information.</Alert>
+      </Box>
+      <Paper component="section" aria-live="polite" elevation={5} sx={{ overflow: "hidden", borderRadius: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2.5, px: { xs: 2.25, sm: 3.25 }, py: 2.5 }}>
+          <Box>
+            <Typography variant="overline" color="primary" sx={{ fontWeight: 800, letterSpacing: "0.09em" }}>
+              {state.currentStep === "result" ? "Complete" : `Step ${index} of ${order.length - 1}`}
+            </Typography>
+            <Typography variant="h2" component="h2">{titles[state.currentStep]}</Typography>
+          </Box>
+          <Button variant="text" onClick={() => { setState(initialState); setCopied(false); }}>Start over</Button>
+        </Box>
+        <LinearProgress variant="determinate" value={(index / order.length) * 100} />
+        <Box component="form" id="pathway-form" key={state.currentStep} onSubmit={submit} onClick={click} sx={{ p: { xs: 2.25, sm: 3.25 } }}>
           {state.result ? <ResultPanel result={state.result} /> : CurrentForm && <CurrentForm state={state} />}
-          {copied && <p className="copy-confirmation">Copied to clipboard</p>}
-        </form>
-      </section>
-      <footer>No data is saved or sent to a server. Recommendations are generated in this browser tab.</footer>
-    </main>
+          {copied && <Alert severity="success" sx={{ mt: 2 }}>Copied to clipboard</Alert>}
+        </Box>
+      </Paper>
+      <Typography component="footer" variant="caption" color="text.secondary" sx={{ textAlign: "center", display: "block", mt: 2.5 }}>
+        No data is saved or sent to a server. Recommendations are generated in this browser tab.
+      </Typography>
+    </Container>
   </>;
 }
-
