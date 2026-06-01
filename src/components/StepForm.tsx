@@ -2,12 +2,8 @@ import type { ReactNode } from "react";
 import {
   Box,
   FormControl,
-  FormControlLabel,
-  FormLabel,
   InputLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
   Select as MuiSelect,
   Stack,
   TextField,
@@ -69,16 +65,8 @@ function Metabolic({ state }: Props) {
     description={<>MASLD screening continues when at least {config.metabolicSyndrome.requiredCriteria} of 5 criteria are met. Medication treatment counts for the associated criterion.</>}
     actions={<Actions back={false} />}
   >
-    <FormControl required sx={{ gridColumn: "1 / -1", flexDirection: "row", alignItems: "center", gap: { xs: 0.5, sm: 1.5 } }}>
-      <FormLabel id="sex-label" sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
-        <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>Sex assigned at birth:</Box>
-        <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>Sex:</Box>
-      </FormLabel>
-      <RadioGroup row aria-labelledby="sex-label" name="sex" defaultValue={text(answers.sex)} sx={{ flexWrap: "nowrap", gap: { xs: 0.25, sm: 0.75 } }}>
-        <FormControlLabel value="male" control={<Radio size="small" />} label="Male" sx={{ flexShrink: 0, m: 0 }} />
-        <FormControlLabel value="female" control={<Radio size="small" />} label="Female" sx={{ flexShrink: 0, m: 0 }} />
-      </RadioGroup>
-    </FormControl>
+    <Select id="sex" name="sex" label="Sex used for pathway thresholds" required defaultValue={text(answers.sex)}
+      options={[["male", "Male"], ["female", "Female"]]} />
     <UnitInput id="waist" label="Waist circumference" value={answers.waist} unit={answers.waistUnit}
       options={[["cm", "cm"], ["in", "inches"]]} />
     <UnitInput id="triglycerides" label="Triglycerides" value={answers.triglycerides} unit={answers.triglyceridesUnit}
