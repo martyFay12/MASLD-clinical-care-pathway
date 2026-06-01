@@ -31,7 +31,7 @@ The implemented logical branches are documented in
 ## Deploy
 
 The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` tests,
-builds, and deploys the app to GitHub Pages after changes are pushed to `MVP`.
+builds, and deploys the app to GitHub Pages after changes are pushed to `main`.
 
 Before the first deployment, enable the workflow as the repository's Pages
 source:
